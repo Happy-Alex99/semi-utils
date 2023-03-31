@@ -52,6 +52,12 @@ layout: # you can select one type in ['normal'], may more type supports later
     - id: Date
 equivalent_focal_length:
     enable: true
-    sensor_resolution_X: 5184
-    sensor_resolution_Y: 3456
-    crop: 1.6
+    
+    'Canon EOS 550D':
+    - sensor_resolution_X: 5184
+    - sensor_resolution_Y: 3456
+    - crop: 1.6
+    'NIKON D750':
+    - sensor_resolution_X: 6016
+    - sensor_resolution_Y: 4016
+    - crop: 1.0

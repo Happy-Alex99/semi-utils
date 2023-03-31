@@ -40,11 +40,18 @@ makes = config['logo']['makes']
 
 # 读取等效焦距配置
 # 先将像素密度铺满135画幅，之后通过分辨率计算出等效焦距。优点是能考虑裁切的影响
-full_fram_resolution=(0,0)
+
+full_fram_resolutions=[]
 if config['equivalent_focal_length']['enable']:
-    crop=config['equivalent_focal_length']['crop']
-    full_fram_resolution=(config['equivalent_focal_length']['sensor_resolution_X']*crop,config['equivalent_focal_length']['sensor_resolution_Y']*crop)
-    #print(full_fram_resolution)
+    for cameraname in config['equivalent_focal_length']:
+        if cameraname != 'enable':
+            crop=config['equivalent_focal_length'][cameraname][2]['crop']
+            x=config['equivalent_focal_length'][cameraname][0]['sensor_resolution_X']
+            y=config['equivalent_focal_length'][cameraname][1]['sensor_resolution_Y']
+            full_fram_resolutions.append((cameraname,x*crop,y*crop))
+full_fram_resolutions=tuple(full_fram_resolutions)
+print('Load camera resolutions')
+print(full_fram_resolutions)            
 
 # 添加 logo
 def append_logo(exif_img, exif):
@@ -194,7 +201,7 @@ if __name__ == '__main__':
             # 打开图片
             img = Image.open(source)
             # 生成 exif 图片
-            exif = get_exif(img,full_fram_resolution)
+            exif = get_exif(img,full_fram_resolutions)
             # 修复图片方向
             if 'Orientation' in exif:
                 if exif['Orientation'] == 3:

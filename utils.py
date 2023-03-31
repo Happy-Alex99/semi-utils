@@ -27,7 +27,7 @@ def concat_img(img_x, img_y):
 
 
 # 读取 exif 信息，包括相机机型、相机品牌、图片尺寸、镜头焦距、光圈大小、曝光时间、ISO 和拍摄时间
-def get_exif(image,full_fram_resolution):
+def get_exif(image,full_fram_resolutions):
     
     _exif = {}
     info = image._getexif()
@@ -38,15 +38,21 @@ def get_exif(image,full_fram_resolution):
             _exif[decoded_attr] = value
         #计算等效焦距
         try:
-            if full_fram_resolution[0]:
+            for camera_ffr in full_fram_resolutions:
+                if camera_ffr[0]==_exif['Model']:
+                    full_fram_resolutionX=camera_ffr[1]
+                    #print(full_fram_resolutionX)
+                    full_fram_resolutionY=camera_ffr[2]
+            if 1:
                 if image.size[0]>image.size[1]:
                     imageX=image.size[0]
                     imageY=image.size[1]
                 else:
                     imageX=image.size[1]
                     imageY=image.size[0]
-                tmp1=full_fram_resolution[0]/imageX
-                tmp2=full_fram_resolution[1]/imageY
+                
+                tmp1=full_fram_resolutionX/imageX
+                tmp2=full_fram_resolutionY/imageY
                 _exif['equivalent_focal_length']=_exif['FocalLength']*tmp1 if tmp1<tmp2 else _exif['FocalLength']*tmp2
         except:
             pass #_exif['equivalent_focal_length']=int(_exif['equivalent_focal_length'])
