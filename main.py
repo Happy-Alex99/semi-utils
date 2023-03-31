@@ -48,7 +48,9 @@ if config['equivalent_focal_length']['enable']:
             crop=config['equivalent_focal_length'][cameraname][2]['crop']
             x=config['equivalent_focal_length'][cameraname][0]['sensor_resolution_X']
             y=config['equivalent_focal_length'][cameraname][1]['sensor_resolution_Y']
-            full_fram_resolutions.append((cameraname,x*crop,y*crop))
+            multi_sensor=config['equivalent_focal_length'][cameraname][3]['multi_sensor']
+            rename=config['equivalent_focal_length'][cameraname][4]['rename']
+            full_fram_resolutions.append((cameraname,x*crop,y*crop,multi_sensor,rename))
 full_fram_resolutions=tuple(full_fram_resolutions)
 print('Load camera resolutions')
 print(full_fram_resolutions)            
@@ -201,7 +203,7 @@ if __name__ == '__main__':
             # 打开图片
             img = Image.open(source)
             # 生成 exif 图片
-            exif = get_exif(img,full_fram_resolutions)
+            exif = get_exif(img,full_fram_resolutions,config,file)
             # 修复图片方向
             if 'Orientation' in exif:
                 if exif['Orientation'] == 3:
@@ -211,7 +213,9 @@ if __name__ == '__main__':
                 elif exif['Orientation'] == 8:
                     img = img.transpose(Transpose.ROTATE_90)
             exif['ExifImageWidth'], exif['ExifImageHeight'] = img.width, img.height
-
+            
+            
+            
             exif_img = make_exif_img(exif, layout)
             # 拼接两张图片
             cnt_img = concat_img(img, exif_img)

@@ -5,7 +5,7 @@ from datetime import datetime
 from PIL import Image
 from PIL.ExifTags import TAGS
 
-
+import json
 def parse_datetime(datetime_string):
     return datetime.strptime(datetime_string, '%Y:%m:%d %H:%M:%S')
 
@@ -27,7 +27,7 @@ def concat_img(img_x, img_y):
 
 
 # 读取 exif 信息，包括相机机型、相机品牌、图片尺寸、镜头焦距、光圈大小、曝光时间、ISO 和拍摄时间
-def get_exif(image,full_fram_resolutions):
+def get_exif(image,full_fram_resolutions,config,file):
     
     _exif = {}
     info = image._getexif()
@@ -36,13 +36,42 @@ def get_exif(image,full_fram_resolutions):
         for attr, value in info.items():
             decoded_attr = TAGS.get(attr, attr)
             _exif[decoded_attr] = value
+        _exif['Model']=_exif['Model'].split('\x00')[0]
         #计算等效焦距
         try:
-            for camera_ffr in full_fram_resolutions:
-                if camera_ffr[0]==_exif['Model']:
-                    full_fram_resolutionX=camera_ffr[1]
-                    #print(full_fram_resolutionX)
-                    full_fram_resolutionY=camera_ffr[2]
+            digital_zoom=1.0
+            for full_fram_resolution in full_fram_resolutions:
+                if full_fram_resolution[0]==_exif['Model']:
+                    if full_fram_resolution[3]==1:#only 1 sensor
+                        full_fram_resolutionX=full_fram_resolution[1]
+                        full_fram_resolutionY=full_fram_resolution[2]
+                    else:
+                        #camera or mobile phone with more than 1 camera
+                        multi_sensor=[]
+                        #read multi sensor information directly from config
+                        for item in config['equivalent_focal_length'][_exif['Model']]:
+                            for key in item:
+                                multi_sensor.append(item[key])
+                        
+                        #sensor information list as: FocalLength,full_fram_resolutionX,full_fram_resolutionY. Will NOT check the order
+                        sensor_index=multi_sensor.index(str(_exif['FocalLength'])+'mm')
+                        
+                        full_fram_resolutionX=multi_sensor[sensor_index+1]
+                        full_fram_resolutionY=multi_sensor[sensor_index+2]
+                        
+                        try:
+                            digital_zoom=digital_zoom*json.loads(_exif[39321])['ZoomMultiple']#Xiaomi Redmi Note 10 Pro
+                        except:
+                            pass
+                        try:
+                            digital_zoom=(digital_zoom*_exif['DigitalZoomRatio'])/100
+                        except:
+                            pass
+                    
+                    break
+            
+            _exif['Model']=full_fram_resolution[4]# Rename camera name
+            
             if 1:
                 if image.size[0]>image.size[1]:
                     imageX=image.size[0]
@@ -51,11 +80,19 @@ def get_exif(image,full_fram_resolutions):
                     imageX=image.size[1]
                     imageY=image.size[0]
                 
+                
+               
                 tmp1=full_fram_resolutionX/imageX
                 tmp2=full_fram_resolutionY/imageY
-                _exif['equivalent_focal_length']=_exif['FocalLength']*tmp1 if tmp1<tmp2 else _exif['FocalLength']*tmp2
+                tmp3=_exif['FocalLength']*tmp1 if tmp1<tmp2 else _exif['FocalLength']*tmp2
+                _exif['equivalent_focal_length']=tmp3*digital_zoom
+                
         except:
             pass #_exif['equivalent_focal_length']=int(_exif['equivalent_focal_length'])
+    if 'PANO' in file.upper():
+        _exif['equivalent_focal_length']='PANO'
+    if 'MERGE' in file.upper():
+        _exif['equivalent_focal_length']='MERGE'
     #print(_exif)
     return _exif
 
@@ -81,10 +118,13 @@ def get_str_from_exif(exif, field):
 def get_param_str_from_exif(exif):
     #print(exif)
     try:
-        if int(exif['equivalent_focal_length']):
-            focal_length = str(int(exif['FocalLength'])) + '('+str(int(exif['equivalent_focal_length'])) + ')' 'mm'
+        if exif['equivalent_focal_length']=='PANO' or exif['equivalent_focal_length']=='MERGE':
+            focal_length = str(int(exif['FocalLength'])) + '('+exif['equivalent_focal_length']+ ')' 'mm'
         else:
-            focal_length = str(int(exif['FocalLength'])) + 'mm'
+            if int(exif['equivalent_focal_length']):
+                focal_length = str(int(exif['FocalLength'])) + '('+str(int(exif['equivalent_focal_length'])) + ')' 'mm'
+            else:
+                focal_length = str(int(exif['FocalLength'])) + 'mm'
         #print(focal_length)
     except:
         focal_length = ""
