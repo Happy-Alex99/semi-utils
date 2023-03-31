@@ -86,13 +86,16 @@ def get_exif(image,full_fram_resolutions,config,file):
                 tmp2=full_fram_resolutionY/imageY
                 tmp3=_exif['FocalLength']*tmp1 if tmp1<tmp2 else _exif['FocalLength']*tmp2
                 _exif['equivalent_focal_length']=tmp3*digital_zoom
-                
+                #print(_exif)
+                #print(digital_zoom)
         except:
             pass #_exif['equivalent_focal_length']=int(_exif['equivalent_focal_length'])
     if 'PANO' in file.upper():
         _exif['equivalent_focal_length']='PANO'
     if 'MERGE' in file.upper():
         _exif['equivalent_focal_length']='MERGE'
+    if 'MULTI' in file.upper():
+        _exif['equivalent_focal_length']='MULTI'
     #print(_exif)
     return _exif
 
@@ -118,7 +121,7 @@ def get_str_from_exif(exif, field):
 def get_param_str_from_exif(exif):
     #print(exif)
     try:
-        if exif['equivalent_focal_length']=='PANO' or exif['equivalent_focal_length']=='MERGE':
+        if exif['equivalent_focal_length']=='PANO' or exif['equivalent_focal_length']=='MERGE'or exif['equivalent_focal_length']=='MULTI':
             focal_length = str(int(exif['FocalLength'])) + '('+exif['equivalent_focal_length']+ ')' 'mm'
         else:
             if int(exif['equivalent_focal_length']):
