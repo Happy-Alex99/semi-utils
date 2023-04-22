@@ -55,6 +55,27 @@ layout: # you can select one type in ['normal'], may more type supports later
 #The programme will NOT check the data's order base on the key, so DO FOLLOW the order.
 equivalent_focal_length:
     enable: true
+    'Canon EOS 7D Mark II':
+    - sensor_resolution_X: 5472
+    - sensor_resolution_Y: 3648
+    - crop: 1.6
+    - multi_sensor: 1
+    - rename: 'Canon EOS 7D Mark II' 
+ 
+    'Canon EOS 80D':
+    - sensor_resolution_X: 6000
+    - sensor_resolution_Y: 4000
+    - crop: 1.6
+    - multi_sensor: 1
+    - rename: 'Canon EOS 80D'
+
+    'Canon EOS 800D':
+    - sensor_resolution_X: 6000
+    - sensor_resolution_Y: 4000
+    - crop: 1.6
+    - multi_sensor: 1
+    - rename: 'Canon EOS 800D'
+
     
     'Canon EOS 550D':
     - sensor_resolution_X: 5184
