@@ -5,7 +5,7 @@ base:
   #output_dir: ./output
   input_dir: "C:/Users/XU/OneDrive2 - mail.sdu.edu.cn/OneDrive - mail.sdu.edu.cn/LightroomOutput/JPEG"
   output_dir: "C:/Users/XU/OneDrive2 - mail.sdu.edu.cn/OneDrive - mail.sdu.edu.cn/LightroomOutput/JPEGwithWaterMark"
-  quality: 90
+  quality: 80
 
 logo: # true or false
   enable: true
@@ -45,16 +45,25 @@ layout: # you can select one type in ['normal'], may more type supports later
   # you can get more information in https://lsvm.xyz/2023/02/semi-utils-intro/
   type: normal
   elements: # the information displayed in the watermark
-    # you can select from ['Date', 'Model', 'LensModel', 'Param', 'Make', 'None']
+    # you can select from ['Date', 'Model', 'LensModel', 'Param', 'Make', 'None', 'DateFilename']
     - id: LensModel
     - id: Model
     - id: Param
-    - id: Date
+    - id: DateFilename
 
 #DO NOT CHANGE ELEMENTS ORDER
 #The programme will NOT check the data's order base on the key, so DO FOLLOW the order.
 equivalent_focal_length:
     enable: true
+    
+    'NIKON D5500':
+    - sensor_resolution_X: 5472
+    - sensor_resolution_Y: 3648
+    - crop: 1.5
+    - multi_sensor: 1
+    - rename: 'NIKON D5500' 
+    
+    
     'Canon EOS 7D Mark II':
     - sensor_resolution_X: 5472
     - sensor_resolution_Y: 3648

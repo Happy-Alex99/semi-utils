@@ -32,13 +32,14 @@ def get_exif(image,full_fram_resolutions,config,file):
     _exif = {}
     info = image._getexif()
     if info:
-        _exif['equivalent_focal_length']=0
-        for attr, value in info.items():
-            decoded_attr = TAGS.get(attr, attr)
-            _exif[decoded_attr] = value
-        _exif['Model']=_exif['Model'].split('\x00')[0]
-        #计算等效焦距
         try:
+            _exif['equivalent_focal_length']=0
+            for attr, value in info.items():
+                decoded_attr = TAGS.get(attr, attr)
+                _exif[decoded_attr] = value
+            _exif['Model']=_exif['Model'].split('\x00')[0]
+            #计算等效焦距
+        
             digital_zoom=1.0
             for full_fram_resolution in full_fram_resolutions:
                 if full_fram_resolution[0]==_exif['Model']:
@@ -100,7 +101,7 @@ def get_exif(image,full_fram_resolutions,config,file):
     return _exif
 
 
-def get_str_from_exif(exif, field):
+def get_str_from_exif(exif, field, filename):
     if 'id' not in field:
         return ''
     field_id = field.get('id')
@@ -109,6 +110,11 @@ def get_str_from_exif(exif, field):
     elif 'Date' == field_id:
         try:
             return datetime.strftime(parse_datetime(exif['DateTimeOriginal']), '%Y-%m-%d %H:%M')
+        except:
+            return ""
+    elif 'DateFilename' == field_id:
+        try:
+            return datetime.strftime(parse_datetime(exif['DateTimeOriginal']), '%Y-%m-%d %H:%M')+'  ['+filename.split('.')[0][-4:]+']'
         except:
             return ""
     else:

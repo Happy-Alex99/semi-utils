@@ -84,17 +84,17 @@ def make_two_line_img(first, second):
     return _img
 
 
-def make_normal_watermark(exif, infos):
+def make_normal_watermark(exif, infos, filename):
     original_width, original_height = infos['original_width'], infos['original_height']
     all_ratio, font_ratio = infos['all_ratio'], infos['font_ratio']
     # 位置 1
-    c_11 = get_str_from_exif(exif, elements[0])
-    c_12 = get_str_from_exif(exif, elements[1])
+    c_11 = get_str_from_exif(exif, elements[0], filename)
+    c_12 = get_str_from_exif(exif, elements[1], filename)
     img_1 = make_two_line_img(c_11, c_12)
 
     # 位置 2
-    c_21 = get_str_from_exif(exif, elements[2])
-    c_22 = get_str_from_exif(exif, elements[3])
+    c_21 = get_str_from_exif(exif, elements[2], filename)
+    c_22 = get_str_from_exif(exif, elements[3], filename)
     img_2 = make_two_line_img(c_21, c_22)
 
     img_watermark = Image.new('RGB', (original_width, math.floor(all_ratio * original_width)), color='white')
@@ -127,7 +127,7 @@ elements = config['layout']['elements']
 
 
 # 生成元信息图片
-def make_exif_img(exif, layout):
+def make_exif_img(exif, layout, filename):
     # 修改水印长宽比
     font_ratio = .07
     all_ratio = .13
@@ -144,7 +144,7 @@ def make_exif_img(exif, layout):
     settings = {'original_width': original_width, 'original_height': original_height, 'all_ratio': all_ratio,
                 'font_ratio': font_ratio}
     if layout == 'normal':
-        img_watermark = make_normal_watermark(exif, settings)
+        img_watermark = make_normal_watermark(exif, settings, filename)
     # 根据照片长缩放水印
     return img_watermark.resize((wm_x_length, wm_y_length), Image.Resampling.LANCZOS)
 
@@ -216,7 +216,8 @@ if __name__ == '__main__':
             
             
             
-            exif_img = make_exif_img(exif, layout)
+            exif_img = make_exif_img(exif, layout, file)
+            #print(file)
             # 拼接两张图片
             cnt_img = concat_img(img, exif_img)
 
