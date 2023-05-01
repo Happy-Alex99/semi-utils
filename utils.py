@@ -1,3 +1,4 @@
+# -*- encoding:utf-8 -*-
 # 修改日期格式
 import os
 from datetime import datetime
@@ -149,4 +150,12 @@ def get_param_str_from_exif(exif):
         iso = 'ISO' + str(exif['ISOSpeedRatings'])
     except:
         iso = ""
-    return '  '.join((focal_length, f_number, exposure_time, iso))
+    
+    try:
+        flash=''
+        if int(exif['Flash'])&1: #Flash fired
+            flash='FL'#chr(9889)#⚡
+    except:
+            flash=''
+    
+    return '  '.join((focal_length, f_number, exposure_time, iso, flash))
