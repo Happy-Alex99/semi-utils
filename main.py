@@ -60,9 +60,17 @@ def append_logo(exif_img, exif):
     logo = None
     if 'Make' in exif:
         make = exif['Make']
-        for m in makes.values():
-            if m['id'] in make:
-                logo = Image.open(m['path'])
+        try:
+            for m in makes.values():
+                if m['id'] == make+'_'+exif['Artist']:
+                        logo = Image.open(m['path'])
+        except:
+            pass
+        if logo == None:
+            
+            for m in makes.values():
+                if m['id'] in make:
+                    logo = Image.open(m['path'])
     if logo is not None:
         logo = logo.resize((exif_img.height, exif_img.height), Image.Resampling.LANCZOS)
         exif_img.paste(logo, (0, 0))
