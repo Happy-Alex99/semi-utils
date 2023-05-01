@@ -101,6 +101,14 @@ def get_exif(image,full_fram_resolutions,config,file):
     #print(_exif)
     return _exif
 
+ExposureProgram_str=['?','M','Auto','Av','Tv','DoF','Speed','Bof','Bif']
+def ExposureProgram_2_str(ExposureProgram):
+    try:
+        return ExposureProgram_str[ExposureProgram]
+    except:
+        print('unknow ExposureProgram')
+        return '??'
+
 
 def get_str_from_exif(exif, field, filename):
     if 'id' not in field:
@@ -116,6 +124,18 @@ def get_str_from_exif(exif, field, filename):
     elif 'DateFilename' == field_id:
         try:
             return datetime.strftime(parse_datetime(exif['DateTimeOriginal']), '%Y-%m-%d %H:%M')+'  ['+filename.split('.')[0][-4:]+']'
+        except:
+            return ""
+    elif 'Model_Exposureinfo' == field_id:
+        try:
+            ExposureBiasValue=int(exif['ExposureBiasValue']*10)/10
+            if ExposureBiasValue > 0:
+                ExposureBiasValue = '+'+str(ExposureBiasValue)+'Ev'
+            elif ExposureBiasValue == 0:
+                ExposureBiasValue = '0Ev'
+            else:
+                ExposureBiasValue = str(ExposureBiasValue)+'Ev'
+            return '  '.join( (exif['Model'],ExposureProgram_2_str(exif['ExposureProgram']), ExposureBiasValue) )
         except:
             return ""
     else:

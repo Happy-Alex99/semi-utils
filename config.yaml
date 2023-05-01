@@ -50,7 +50,7 @@ layout: # you can select one type in ['normal'], may more type supports later
   elements: # the information displayed in the watermark
     # you can select from ['Date', 'Model', 'LensModel', 'Param', 'Make', 'None', 'DateFilename']
     - id: LensModel
-    - id: Model
+    - id: Model_Exposureinfo
     - id: Param
     - id: DateFilename
 
