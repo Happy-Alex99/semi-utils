@@ -7,6 +7,8 @@ from PIL import Image
 from PIL.ExifTags import TAGS
 
 import json
+
+import re
 def parse_datetime(datetime_string):
     return datetime.strptime(datetime_string, '%Y:%m:%d %H:%M:%S')
 
@@ -109,7 +111,15 @@ def ExposureProgram_2_str(ExposureProgram):
         print('unknow ExposureProgram')
         return '??'
 
-
+def get_filename_number(filename):
+    #return filename.split('.')[0][-4:]
+    #filename.split('-')[1].split('_')[1][:4]
+    numbers_4_in_filename=re.findall('\d{4,}',filename)
+    try:
+        return numbers_4_in_filename[1]
+    except:
+        print('cannot obtain file number')
+        return '    '
 def get_str_from_exif(exif, field, filename):
     if 'id' not in field:
         return ''
@@ -123,7 +133,8 @@ def get_str_from_exif(exif, field, filename):
             return ""
     elif 'DateFilename' == field_id:
         try:
-            return datetime.strftime(parse_datetime(exif['DateTimeOriginal']), '%Y-%m-%d %H:%M')+'  ['+filename.split('.')[0][-4:]+']'
+            
+            return datetime.strftime(parse_datetime(exif['DateTimeOriginal']), '%Y-%m-%d %H:%M')+'  ['+get_filename_number(filename)+']'
         except:
             return ""
     elif 'Model_Exposureinfo' == field_id:
