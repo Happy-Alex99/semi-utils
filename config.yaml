@@ -7,15 +7,18 @@ base:
   output_dir: "C:/Users/XU/OneDrive2 - mail.sdu.edu.cn/OneDrive - mail.sdu.edu.cn/LightroomOutput/JPEGwithWaterMark"
   quality: 80
 
-logo: # true or false
+logo: # true or false, different Artist logo format: Brand+'_'+Artist. i.e. Canon_Alex ./logos/canon_04.13.2421.png
   enable: true
   makes:
     nikon:
       id: NIKON
       path: ./logos/nikon.png
+    canon_Alex:
+      id: Canon_Alex
+      path: ./logos/canon_04.13.2421.png
     canon:
       id: Canon
-      path: ./logos/canon_04.13.2421.png
+      path: ./logos/canon.png
     sony:
       id: SONY
       path: ./logos/sony.png
@@ -135,3 +138,17 @@ equivalent_focal_length:
     - specialFocalLength--4: 200mm
     - sensor_resolution_X--4: 0
     - sensor_resolution_Y--4: 0
+    
+    'Canon EOS 600D':
+    - sensor_resolution_X: 5184
+    - sensor_resolution_Y: 3456
+    - crop: 1.6
+    - multi_sensor: 1
+    - rename: 'Canon EOS 600D'
+
+    'Unknow':
+    - sensor_resolution_X: 10
+    - sensor_resolution_Y: 10
+    - crop: 1.5
+    - multi_sensor: 1
+    - rename: 'Camera_Not_Config'
