@@ -8,6 +8,7 @@ from PIL.ExifTags import TAGS
 
 import json
 
+import pyexiv2
 import re
 def parse_datetime(datetime_string):
     return datetime.strptime(datetime_string, '%Y:%m:%d %H:%M:%S')
@@ -120,7 +121,29 @@ def get_filename_number(filename):
     except:
         print('cannot obtain file number')
         return '    '
-def get_str_from_exif(exif, field, filename):
+
+def ExposureBias2str (ev, force_plus=0, end_with_Ev=1):#
+    _ev=int(float(ev)*10)/10
+    if _ev > 0:
+        ev_str = '+'+str(_ev)+''
+    elif _ev == 0:
+        if force_plus:
+            ev_str = '+0'
+        else:
+            ev_str = '0'
+    else:
+        ev_str = str(_ev)
+    if end_with_Ev:
+        ev_str=ev_str+'Ev'
+    return ev_str
+
+def ExposureBias2str_dual (ev_shoot, ev_lightroom):
+    
+    return ExposureBias2str(ev_shoot,end_with_Ev=0)+ExposureBias2str(ev_shoot, force_plus=1,end_with_Ev=1)
+    
+    
+        
+def get_str_from_exif(exif, field, filename, xmp):
     if 'id' not in field:
         return ''
     field_id = field.get('id')
@@ -139,16 +162,17 @@ def get_str_from_exif(exif, field, filename):
             return ""
     elif 'Model_Exposureinfo' == field_id:
         try:
-            ExposureBiasValue=int(exif['ExposureBiasValue']*10)/10
-            if ExposureBiasValue > 0:
-                ExposureBiasValue = '+'+str(ExposureBiasValue)+'Ev'
-            elif ExposureBiasValue == 0:
-                ExposureBiasValue = '0Ev'
-            else:
-                ExposureBiasValue = str(ExposureBiasValue)+'Ev'
-            return '  '.join( (exif['Model'],ExposureProgram_2_str(exif['ExposureProgram']), ExposureBiasValue) )
+            ((int(float(xmp['Xmp.crs.Exposure2012'])*10))/10)
+            exif_ExposureBiasValue=exif['ExposureBiasValue']
+            xmp_ExposureBiasValue=xmp['Xmp.crs.Exposure2012']
+            ExposureBiasValue_str=ExposureBias2str_dual(exif_ExposureBiasValue,xmp_ExposureBiasValue)
+            
+            #print(ExposureBiasValue_str)
+            
+            return '  '.join( (exif['Model'],ExposureProgram_2_str(exif['ExposureProgram']), ExposureBiasValue_str) )
         except:
             return ""
+        
     else:
         if field_id in exif:
             return exif[field_id]

@@ -93,17 +93,17 @@ def make_two_line_img(first, second):
     return _img
 
 
-def make_normal_watermark(exif, infos, filename):
+def make_normal_watermark(exif, infos, filename, xmp):
     original_width, original_height = infos['original_width'], infos['original_height']
     all_ratio, font_ratio = infos['all_ratio'], infos['font_ratio']
     # 位置 1
-    c_11 = get_str_from_exif(exif, elements[0], filename)
-    c_12 = get_str_from_exif(exif, elements[1], filename)
+    c_11 = get_str_from_exif(exif, elements[0], filename, xmp)
+    c_12 = get_str_from_exif(exif, elements[1], filename, xmp)
     img_1 = make_two_line_img(c_11, c_12)
 
     # 位置 2
-    c_21 = get_str_from_exif(exif, elements[2], filename)
-    c_22 = get_str_from_exif(exif, elements[3], filename)
+    c_21 = get_str_from_exif(exif, elements[2], filename, xmp)
+    c_22 = get_str_from_exif(exif, elements[3], filename, xmp)
     img_2 = make_two_line_img(c_21, c_22)
 
     img_watermark = Image.new('RGB', (original_width, math.floor(all_ratio * original_width)), color='white')
@@ -136,7 +136,7 @@ elements = config['layout']['elements']
 
 
 # 生成元信息图片
-def make_exif_img(exif, layout, filename):
+def make_exif_img(exif, layout, filename, xmp):
     # 修改水印长宽比
     font_ratio = .07
     all_ratio = .13
@@ -153,7 +153,7 @@ def make_exif_img(exif, layout, filename):
     settings = {'original_width': original_width, 'original_height': original_height, 'all_ratio': all_ratio,
                 'font_ratio': font_ratio}
     if layout == 'normal':
-        img_watermark = make_normal_watermark(exif, settings, filename)
+        img_watermark = make_normal_watermark(exif, settings, filename, xmp)
     # 根据照片长缩放水印
     return img_watermark.resize((wm_x_length, wm_y_length), Image.Resampling.LANCZOS)
 
@@ -211,6 +211,8 @@ if __name__ == '__main__':
         if(skip_this_file == False ):
             # 打开图片
             img = Image.open(source)
+            imgin_pyexiv2=pyexiv2.Image(source,encoding='GBK')
+            xmp=imgin_pyexiv2.read_xmp()
             # 生成 exif 图片
             exif = get_exif(img,full_fram_resolutions,config,file)
             # 修复图片方向
@@ -225,7 +227,7 @@ if __name__ == '__main__':
             
             
             
-            exif_img = make_exif_img(exif, layout, file)
+            exif_img = make_exif_img(exif, layout, file, xmp)
             #print(file)
             # 拼接两张图片
             cnt_img = concat_img(img, exif_img)
@@ -235,7 +237,7 @@ if __name__ == '__main__':
             img.close()
             
             #拷贝EXIF和IPTC等元数据
-            imgin_pyexiv2=pyexiv2.Image(source,encoding='GBK')
+            #imgin_pyexiv2=pyexiv2.Image(source,encoding='GBK')
             imgtarget_pyexiv2=pyexiv2.Image(target,encoding='GBK')
             
             orgiptc=imgin_pyexiv2.read_iptc()
@@ -245,6 +247,7 @@ if __name__ == '__main__':
             orgicc=imgin_pyexiv2.read_icc()
             orgthumbnail=imgin_pyexiv2.read_thumbnail()
             
+
             
             imgtarget_pyexiv2.modify_iptc(orgiptc)
             imgtarget_pyexiv2.modify_raw_xmp(orgxmp)
