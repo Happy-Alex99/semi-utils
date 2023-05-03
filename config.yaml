@@ -56,6 +56,9 @@ layout: # you can select one type in ['normal'], may more type supports later
 
 #DO NOT CHANGE ELEMENTS ORDER
 #The programme will NOT check the data's order base on the key, so DO FOLLOW the order.
+lens_rename:
+    'TAMRON SP 17-50mm F/2.8 DiII A16E':
+    - rename: 'TAMRON 17-50mm F/2.8 A16' 
 equivalent_focal_length:
     enable: true
     
@@ -72,21 +75,21 @@ equivalent_focal_length:
     - sensor_resolution_Y: 3648
     - crop: 1.6
     - multi_sensor: 1
-    - rename: 'Canon EOS 7D Mark II' 
+    - rename: 'EOS 7D Mark II' 
  
     'Canon EOS 80D':
     - sensor_resolution_X: 6000
     - sensor_resolution_Y: 4000
     - crop: 1.6
     - multi_sensor: 1
-    - rename: 'Canon EOS 80D'
+    - rename: 'EOS 80D'
 
     'Canon EOS 800D':
     - sensor_resolution_X: 6000
     - sensor_resolution_Y: 4000
     - crop: 1.6
     - multi_sensor: 1
-    - rename: 'Canon EOS 800D'
+    - rename: 'EOS 800D'
 
     
     'Canon EOS 550D':
@@ -94,7 +97,7 @@ equivalent_focal_length:
     - sensor_resolution_Y: 3456
     - crop: 1.6
     - multi_sensor: 1
-    - rename: 'Canon EOS 550D'
+    - rename: 'EOS 550D'
     'NIKON D750':
     - sensor_resolution_X: 6016
     - sensor_resolution_Y: 4016
@@ -144,7 +147,7 @@ equivalent_focal_length:
     - sensor_resolution_Y: 3456
     - crop: 1.6
     - multi_sensor: 1
-    - rename: 'Canon EOS 600D'
+    - rename: 'EOS 600D'
 
     'Unknow':
     - sensor_resolution_X: 10

@@ -76,7 +76,11 @@ def get_exif(image,full_fram_resolutions,config,file):
                     break
             
             _exif['Model']=full_fram_resolution[4]# Rename camera name
-            
+            try:
+                _exif['LensModel']=config['lens_rename'][_exif['LensModel']][0]['rename']#rename lens
+            except:
+                pass
+            print(_exif['LensModel'])
             if 1:
                 if image.size[0]>image.size[1]:
                     imageX=image.size[0]
@@ -122,7 +126,7 @@ def get_filename_number(filename):
         print('cannot obtain file number')
         return '    '
 
-def ExposureBias2str (ev, force_plus=0, end_with_Ev=1):#
+def ExposureBias2str (ev, force_plus_when0=0, end_with_Ev=1):#
     _ev=int(float(ev)*10)/10
     if _ev > 0:
         ev_str = '+'+str(_ev)+''
@@ -139,7 +143,7 @@ def ExposureBias2str (ev, force_plus=0, end_with_Ev=1):#
 
 def ExposureBias2str_dual (ev_shoot, ev_lightroom):
     
-    return ExposureBias2str(ev_shoot,end_with_Ev=0)+ExposureBias2str(ev_shoot, force_plus=1,end_with_Ev=1)
+    return ExposureBias2str(ev_shoot,end_with_Ev=0)+ExposureBias2str(ev_shoot, force_plus_when0=1,end_with_Ev=1)
     
     
         
