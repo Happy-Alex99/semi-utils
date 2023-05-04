@@ -152,8 +152,8 @@ def ExposureBias2str (ev, force_plus_when0=0, end_with_Ev=1):#
     return ev_str
 
 def ExposureBias2str_dual (ev_shoot, ev_lightroom):
-    
-    return ExposureBias2str(ev_shoot,end_with_Ev=0)+ExposureBias2str(ev_shoot, force_plus_when0=1,end_with_Ev=1)
+    #print(ev_lightroom)
+    return ExposureBias2str(ev_shoot,end_with_Ev=0)+ExposureBias2str(ev_lightroom, force_plus_when0=1,end_with_Ev=1)
     
     
         
