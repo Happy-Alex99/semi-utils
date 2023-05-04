@@ -80,7 +80,7 @@ def get_exif(image,full_fram_resolutions,config,file):
                 _exif['LensModel']=config['lens_rename'][_exif['LensModel']][0]['rename']#rename lens
             except:
                 pass
-            print(_exif['LensModel'])
+            
             if 1:
                 if image.size[0]>image.size[1]:
                     imageX=image.size[0]
@@ -127,11 +127,21 @@ def get_filename_number(filename):
         return '    '
 
 def ExposureBias2str (ev, force_plus_when0=0, end_with_Ev=1):#
-    _ev=int(float(ev)*10)/10
+    try:
+        _ev=int(float(ev)*10)/10
+    except:
+        if force_plus_when0:
+            ev_str = '+?'
+        else:
+            ev_str = '?'
+    
+        if end_with_Ev:
+            ev_str=ev_str+'Ev'
+        return ev_str
     if _ev > 0:
         ev_str = '+'+str(_ev)+''
     elif _ev == 0:
-        if force_plus:
+        if force_plus_when0:
             ev_str = '+0'
         else:
             ev_str = '0'
@@ -166,9 +176,9 @@ def get_str_from_exif(exif, field, filename, xmp):
             return ""
     elif 'Model_Exposureinfo' == field_id:
         try:
-            ((int(float(xmp['Xmp.crs.Exposure2012'])*10))/10)
             exif_ExposureBiasValue=exif['ExposureBiasValue']
             xmp_ExposureBiasValue=xmp['Xmp.crs.Exposure2012']
+            
             ExposureBiasValue_str=ExposureBias2str_dual(exif_ExposureBiasValue,xmp_ExposureBiasValue)
             
             #print(ExposureBiasValue_str)
