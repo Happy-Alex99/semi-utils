@@ -36,6 +36,22 @@ def resize_scale_down(image, resolution):
     image=image.resize(target_res,Image.LANCZOS)
     return image
 
+def padding_up_by_ratio(image, padding_ratio):
+    if image.size[0]>image.size[1]:
+        target_x=image.size[1]*padding_ratio
+        img = Image.new('RGB', (int(target_x),image.size[1]), color='white')
+        
+        img.paste(image, (int((target_x-image.size[0])/2), 0 )  )
+        return img
+    else:
+        target_y=image.size[0]*padding_ratio
+        img = Image.new('RGB', (image.size[0],int(target_y)), color='white')
+        
+        img.paste(image, (0, int((target_y-image.size[1])/2) ))
+        return img
+
+
+
 def parse_datetime(datetime_string):
     return datetime.strptime(datetime_string, '%Y:%m:%d %H:%M:%S')
 

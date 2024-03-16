@@ -14,7 +14,7 @@ from PIL import ImageFont
 from PIL.Image import Transpose
 
 
-from utils import parse_datetime, get_file_list, concat_img, get_exif, get_str_from_exif, resize_scale_down
+from utils import parse_datetime, get_file_list, concat_img, get_exif, get_str_from_exif, resize_scale_down, padding_up_by_ratio
 
 # 布局，全局配置
 FONT_SIZE = 240
@@ -29,6 +29,7 @@ parser.add_argument('-in','--input_dir', default='')
 parser.add_argument('-out','--output_dir', default='')
 parser.add_argument('-q','--quality', default=80)
 parser.add_argument('-r','--resolution', default=0)
+parser.add_argument('-s','--shape', default=0)
 args = parser.parse_args()
 #print(args)
 
@@ -44,8 +45,8 @@ with open(parser_config_file, 'r') as f:
 
 # 读取配置
 quality = int(args.quality)
-resolution = args.resolution
-
+resolution = int(args.resolution)
+padding_ratio = float(args.shape)
 
 if not os.path.exists(output_dir):
     os.makedirs(output_dir)
@@ -222,9 +223,16 @@ def semi_utils_wrapper(source,full_fram_resolutions,config,file,layout,target,qu
     # 拼接两张图片
     cnt_img = concat_img(img, exif_img)
 
+
+    
+    
+    
+    if padding_ratio !=0:
+        cnt_img=padding_up_by_ratio(cnt_img,padding_ratio)
+    
     if resolution != 0:
         cnt_img=resize_scale_down(cnt_img,resolution)
-
+    
     cnt_img.save(target, quality=quality )
     cnt_img.close()
     img.close()
