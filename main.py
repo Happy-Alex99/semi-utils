@@ -197,7 +197,7 @@ def read_file_change_time(input_dir):
         document_load=[]
     return document_load
 
-def semi_utils_wrapper(source,full_fram_resolutions,config,file,layout,target,quality,file_write):
+def semi_utils_wrapper(source,full_fram_resolutions,config,file,layout,target,quality):
     #
     # 打开图片
     img = Image.open(source)
@@ -253,8 +253,8 @@ def semi_utils_wrapper(source,full_fram_resolutions,config,file,layout,target,qu
     imgtarget_pyexiv2.close()
     #print(img.info)
     #print(" WRITE "+target[-30:])
-    file_write.append(" WRITE "+target[-30:])
-    print(file_write[-1])
+    
+    print(" WRITE "+target[-30:])
 if __name__ == '__main__':
     print('#INFO:CONFIG FILE:'+parser_config_file)
     print('Load camera resolutions')
@@ -262,7 +262,7 @@ if __name__ == '__main__':
 
     file_list = get_file_list(input_dir)
     layout = config['layout']['type']
-    file_write=[]
+    file_write_count=0
     #file_skip=[]
     file_skip_count=0
     
@@ -290,10 +290,11 @@ if __name__ == '__main__':
         
         
         if(skip_this_file == False ):
-            p=Process(target=semi_utils_wrapper,args=(source,full_fram_resolutions,config,file,layout,target,quality,file_write))
+            p=Process(target=semi_utils_wrapper,args=(source,full_fram_resolutions,config,file,layout,target,quality))
             p.start()
             process_list.append(p)
             #semi_utils_wrapper(source,full_fram_resolutions,config,file,layout,target,quality)
+            file_write_count=file_write_count+1
         else:
             pass
             file_skip_count=file_skip_count+1
@@ -309,6 +310,6 @@ if __name__ == '__main__':
         p.join()
     print()
     print("SKIP  "+str(file_skip_count)+" Files")
-    print("WRITE "+str(len(file_write))+" Files")
+    print("WRITE "+str(file_write_count)+" Files")
     save_file_change_time(input_dir,new_list_file_change_time)
     
