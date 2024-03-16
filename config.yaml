@@ -3,9 +3,8 @@ base:
   bold_font: ./fonts/SourceHanSansCN-Bold.otf
   #input_dir: ./input
   #output_dir: ./output
-  input_dir: "C:/Users/XU/OneDrive2 - mail.sdu.edu.cn/OneDrive - mail.sdu.edu.cn/LightroomOutput/JPEG"
-  output_dir: "C:/Users/XU/OneDrive2 - mail.sdu.edu.cn/OneDrive - mail.sdu.edu.cn/LightroomOutput/JPEGwithWaterMark"
-  quality: 80
+  
+
 
 logo: # true or false, different Artist logo format: Brand+'_'+Artist. i.e. Canon_Alex ./logos/canon_04.13.2421.png
   enable: true
@@ -59,6 +58,8 @@ layout: # you can select one type in ['normal'], may more type supports later
 lens_rename:
     'TAMRON SP 17-50mm F/2.8 DiII A16E':
     - rename: 'TAMRON 17-50mm F/2.8 A16' 
+    'TAMRON SP 150-600mm F/5-6.3 Di VC USD G2 A022':
+    - rename: 'TAMRON 150-600mm F/5-6.3 A022' 
 equivalent_focal_length:
     enable: true
     
@@ -148,10 +149,31 @@ equivalent_focal_length:
     - crop: 1.6
     - multi_sensor: 1
     - rename: 'EOS 600D'
-
+    
+    'Canon EOS R6':
+    - sensor_resolution_X: 5472
+    - sensor_resolution_Y: 3648
+    - crop: 1.0
+    - multi_sensor: 1
+    - rename: 'EOS R6'
+    
+    'ILCE-7RM3A':
+    - sensor_resolution_X: 7952
+    - sensor_resolution_Y: 5304
+    - crop: 1.0
+    - multi_sensor: 1
+    - rename: 'A7R3a'
+    
+    'NIKON Z 6':
+    - sensor_resolution_X: 5000
+    - sensor_resolution_Y: 3328
+    - crop: 1.0
+    - multi_sensor: 1
+    - rename: 'NIKON Z 6'
+    
     'Unknow':
-    - sensor_resolution_X: 10
-    - sensor_resolution_Y: 10
-    - crop: 1.5
+    - sensor_resolution_X: 0
+    - sensor_resolution_Y: 0
+    - crop: 1
     - multi_sensor: 1
     - rename: 'Camera_Not_Config'
