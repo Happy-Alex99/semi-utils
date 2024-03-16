@@ -7,9 +7,35 @@ from PIL import Image
 from PIL.ExifTags import TAGS
 
 import json
+import sys
 
 import pyexiv2
 import re
+
+#def min(a,b):
+#    if a<b:
+#        return a
+#    else:
+#        return b
+
+def resize_scale_down(image, resolution):
+    resolution=int(resolution)
+    short_size=min(image.size[0], image.size[1])
+    
+    scale=resolution/short_size
+    
+    
+    
+    while(True):
+        target_res=(int(image.size[0]*scale),int(image.size[1]*scale))
+        if not min( target_res[0], target_res[1]) >resolution:
+            break
+        scale=scale+0.01
+    if scale>1:
+        return image
+    image=image.resize(target_res,Image.LANCZOS)
+    return image
+
 def parse_datetime(datetime_string):
     return datetime.strptime(datetime_string, '%Y:%m:%d %H:%M:%S')
 
@@ -121,7 +147,14 @@ def get_filename_number(filename):
     #filename.split('-')[1].split('_')[1][:4]
     numbers_4_in_filename=re.findall('\d{4,}',filename)
     try:
-        return numbers_4_in_filename[1]
+        filename_numbers=numbers_4_in_filename[1]
+        if len(filename_numbers)==8:
+            try:
+                filename_numbers=numbers_4_in_filename[2]
+                print('using:numbers_4_in_filename[2]')
+            except:
+                print('Warning: numbers_4_in_filename[2]')
+        return filename_numbers
     except:
         print('cannot obtain file number')
         return '    '
@@ -176,15 +209,25 @@ def get_str_from_exif(exif, field, filename, xmp):
             return ""
     elif 'Model_Exposureinfo' == field_id:
         try:
-            exif_ExposureBiasValue=exif['ExposureBiasValue']
-            xmp_ExposureBiasValue=xmp['Xmp.crs.Exposure2012']
+            try:
+                exif_ExposureBiasValue=exif['ExposureBiasValue']
+            except:
+                exif_ExposureBiasValue='?'
+            try:
+                xmp_ExposureBiasValue=xmp['Xmp.crs.Exposure2012']
+            except:
+                xmp_ExposureBiasValue='?'
             
-            ExposureBiasValue_str=ExposureBias2str_dual(exif_ExposureBiasValue,xmp_ExposureBiasValue)
-            
+            try:
+                ExposureBiasValue_str=ExposureBias2str_dual(exif_ExposureBiasValue,xmp_ExposureBiasValue)
+            except:
+                ExposureBiasValue_str=exif_ExposureBiasValue+xmp_ExposureBiasValue
             #print(ExposureBiasValue_str)
             
             return '  '.join( (exif['Model'],ExposureProgram_2_str(exif['ExposureProgram']), ExposureBiasValue_str) )
         except:
+            print(__file__)
+            print(sys._getframe().f_lineno)
             return ""
         
     else:

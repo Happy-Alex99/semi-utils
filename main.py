@@ -2,6 +2,9 @@
 import math
 import os
 import time
+from multiprocessing import  Process
+
+import argparse
 
 import yaml
 #import piexif
@@ -11,7 +14,7 @@ from PIL import ImageFont
 from PIL.Image import Transpose
 
 
-from utils import parse_datetime, get_file_list, concat_img, get_exif, get_str_from_exif
+from utils import parse_datetime, get_file_list, concat_img, get_exif, get_str_from_exif, resize_scale_down
 
 # 布局，全局配置
 FONT_SIZE = 240
@@ -20,16 +23,33 @@ UP_DOWN_MARGIN = FONT_SIZE + BORDER_PIXEL
 LEFT_RIGHT_MARGIN = FONT_SIZE + BORDER_PIXEL
 GAP_PIXEL = 90
 
-# 读取配置
-with open('config.yaml', 'r') as f:
+parser = argparse.ArgumentParser(description='MemDump_Check')
+parser.add_argument('-c','--config', default='config.yaml')
+parser.add_argument('-in','--input_dir', default='')
+parser.add_argument('-out','--output_dir', default='')
+parser.add_argument('-q','--quality', default=80)
+parser.add_argument('-r','--resolution', default=0)
+args = parser.parse_args()
+#print(args)
+
+parser_config_file=args.config
+
+input_dir=args.input_dir
+output_dir=args.output_dir
+
+with open(parser_config_file, 'r') as f:
     config = yaml.safe_load(f)
 
-# 读取输入、输出配置
-input_dir = config['base']['input_dir']
-output_dir = config['base']['output_dir']
+
+
+# 读取配置
+quality = int(args.quality)
+resolution = args.resolution
+
+
 if not os.path.exists(output_dir):
     os.makedirs(output_dir)
-quality = config['base']['quality']
+
 
 # 读取字体配置
 font = ImageFont.truetype(config['base']['font'], FONT_SIZE)
@@ -53,8 +73,7 @@ if config['equivalent_focal_length']['enable']:
             rename=config['equivalent_focal_length'][cameraname][4]['rename']
             full_fram_resolutions.append((cameraname,x*crop,y*crop,multi_sensor,rename))
 full_fram_resolutions=tuple(full_fram_resolutions)
-print('Load camera resolutions')
-print(full_fram_resolutions)            
+          
 
 # 添加 logo
 def append_logo(exif_img, exif):
@@ -178,7 +197,69 @@ def read_file_change_time(input_dir):
         document_load=[]
     return document_load
 
+def semi_utils_wrapper(source,full_fram_resolutions,config,file,layout,target,quality,file_write):
+    #
+    # 打开图片
+    img = Image.open(source)
+    imgin_pyexiv2=pyexiv2.Image(source,encoding='GBK')
+    xmp=imgin_pyexiv2.read_xmp()
+    # 生成 exif 图片
+    exif = get_exif(img,full_fram_resolutions,config,file)
+    # 修复图片方向
+    if 'Orientation' in exif:
+        if exif['Orientation'] == 3:
+            img = img.transpose(Transpose.ROTATE_180)
+        elif exif['Orientation'] == 6:
+            img = img.transpose(Transpose.ROTATE_270)
+        elif exif['Orientation'] == 8:
+            img = img.transpose(Transpose.ROTATE_90)
+    exif['ExifImageWidth'], exif['ExifImageHeight'] = img.width, img.height
+    
+    
+    
+    exif_img = make_exif_img(exif, layout, file, xmp)
+    #print(file)
+    # 拼接两张图片
+    cnt_img = concat_img(img, exif_img)
+
+    if resolution != 0:
+        cnt_img=resize_scale_down(cnt_img,resolution)
+
+    cnt_img.save(target, quality=quality )
+    cnt_img.close()
+    img.close()
+    
+    #拷贝EXIF和IPTC等元数据
+    #imgin_pyexiv2=pyexiv2.Image(source,encoding='GBK')
+    imgtarget_pyexiv2=pyexiv2.Image(target,encoding='GBK')
+    
+    orgiptc=imgin_pyexiv2.read_iptc()
+    orgxmp=imgin_pyexiv2.read_raw_xmp()
+    orgexif=imgin_pyexiv2.read_exif()
+    orgcomment=imgin_pyexiv2.read_comment()
+    orgicc=imgin_pyexiv2.read_icc()
+    orgthumbnail=imgin_pyexiv2.read_thumbnail()
+    
+
+    
+    imgtarget_pyexiv2.modify_iptc(orgiptc)
+    imgtarget_pyexiv2.modify_raw_xmp(orgxmp)
+    imgtarget_pyexiv2.modify_exif(orgexif)
+    #imgtarget_pyexiv2.modify_comment(orgcomment)
+    #imgtarget_pyexiv2.modify_icc(orgicc)  
+    #imgtarget_pyexiv2.modify_thumbnail(orgthumbnail)
+    
+    imgin_pyexiv2.close()
+    imgtarget_pyexiv2.close()
+    #print(img.info)
+    #print(" WRITE "+target[-30:])
+    file_write.append(" WRITE "+target[-30:])
+    print(file_write[-1])
 if __name__ == '__main__':
+    print('#INFO:CONFIG FILE:'+parser_config_file)
+    print('Load camera resolutions')
+    print(full_fram_resolutions)  
+
     file_list = get_file_list(input_dir)
     layout = config['layout']['type']
     file_write=[]
@@ -188,7 +269,7 @@ if __name__ == '__main__':
     
     new_list_file_change_time=[]#新的列表，存放这次运行时输入文件的修改时间
     old_list_file_change_time=read_file_change_time(input_dir)#旧的列表，存放上一次运行时输入文件的修改时间
-    
+    process_list=[]
     for file in file_list:
         
         skip_this_file=False
@@ -209,66 +290,23 @@ if __name__ == '__main__':
         
         
         if(skip_this_file == False ):
-            # 打开图片
-            img = Image.open(source)
-            imgin_pyexiv2=pyexiv2.Image(source,encoding='GBK')
-            xmp=imgin_pyexiv2.read_xmp()
-            # 生成 exif 图片
-            exif = get_exif(img,full_fram_resolutions,config,file)
-            # 修复图片方向
-            if 'Orientation' in exif:
-                if exif['Orientation'] == 3:
-                    img = img.transpose(Transpose.ROTATE_180)
-                elif exif['Orientation'] == 6:
-                    img = img.transpose(Transpose.ROTATE_270)
-                elif exif['Orientation'] == 8:
-                    img = img.transpose(Transpose.ROTATE_90)
-            exif['ExifImageWidth'], exif['ExifImageHeight'] = img.width, img.height
-            
-            
-            
-            exif_img = make_exif_img(exif, layout, file, xmp)
-            #print(file)
-            # 拼接两张图片
-            cnt_img = concat_img(img, exif_img)
-
-            cnt_img.save(target, quality=quality )
-            cnt_img.close()
-            img.close()
-            
-            #拷贝EXIF和IPTC等元数据
-            #imgin_pyexiv2=pyexiv2.Image(source,encoding='GBK')
-            imgtarget_pyexiv2=pyexiv2.Image(target,encoding='GBK')
-            
-            orgiptc=imgin_pyexiv2.read_iptc()
-            orgxmp=imgin_pyexiv2.read_raw_xmp()
-            orgexif=imgin_pyexiv2.read_exif()
-            orgcomment=imgin_pyexiv2.read_comment()
-            orgicc=imgin_pyexiv2.read_icc()
-            orgthumbnail=imgin_pyexiv2.read_thumbnail()
-            
-
-            
-            imgtarget_pyexiv2.modify_iptc(orgiptc)
-            imgtarget_pyexiv2.modify_raw_xmp(orgxmp)
-            imgtarget_pyexiv2.modify_exif(orgexif)
-            #imgtarget_pyexiv2.modify_comment(orgcomment)
-            #imgtarget_pyexiv2.modify_icc(orgicc)  
-            #imgtarget_pyexiv2.modify_thumbnail(orgthumbnail)
-            
-            imgin_pyexiv2.close()
-            imgtarget_pyexiv2.close()
-            #print(img.info)
-            #print(" WRITE "+target[-30:])
-            file_write.append(" WRITE "+target[-30:])
-            print(file_write[-1])
+            p=Process(target=semi_utils_wrapper,args=(source,full_fram_resolutions,config,file,layout,target,quality,file_write))
+            p.start()
+            process_list.append(p)
+            #semi_utils_wrapper(source,full_fram_resolutions,config,file,layout,target,quality)
         else:
             pass
             file_skip_count=file_skip_count+1
             #file_skip.append("#SKIP# "+target[-30:])
             #print(file_skip[-1])
         
+        if len(process_list)>32:
+            process_list[0].join()
+            del(process_list[0])
+            
         
+    for p in process_list:
+        p.join()
     print()
     print("SKIP  "+str(file_skip_count)+" Files")
     print("WRITE "+str(len(file_write))+" Files")
