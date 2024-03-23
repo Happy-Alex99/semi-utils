@@ -30,6 +30,7 @@ parser.add_argument('-out','--output_dir', default='')
 parser.add_argument('-q','--quality', default=80)
 parser.add_argument('-r','--resolution', default=0)
 parser.add_argument('-s','--shape', default=0)
+parser.add_argument('-y','--file_younger_than', default=0)
 args = parser.parse_args()
 #print(args)
 
@@ -47,6 +48,7 @@ with open(parser_config_file, 'r') as f:
 quality = int(args.quality)
 resolution = int(args.resolution)
 padding_ratio = float(args.shape)
+file_younger_than= float(args.file_younger_than)
 
 if not os.path.exists(output_dir):
     os.makedirs(output_dir)
@@ -294,8 +296,10 @@ if __name__ == '__main__':
                 skip_this_file = True
             else:
                 skip_this_file = False
-        
-        
+        if file_younger_than!=0:
+            file_age=(time.time()-os.path.getmtime(source))/(24*3600)
+            if file_age>file_younger_than:
+                skip_this_file = True
         
         if(skip_this_file == False ):
             p=Process(target=semi_utils_wrapper,args=(source,full_fram_resolutions,config,file,layout,target,quality))
