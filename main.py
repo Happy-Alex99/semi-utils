@@ -190,20 +190,20 @@ def make_exif_img(exif, layout, filename, xmp):
     return img_watermark.resize((wm_x_length, wm_y_length), Image.Resampling.LANCZOS)
 
 # 保存输入文件名及修改日期
-def save_file_change_time(input_dir,document_change_time_list):
-    file = open(os.path.join(input_dir, 'semi-utils_file_change_time_for.pylist'), 'w')
+def save_file_change_time(dir,document_change_time_list):
+    file = open(os.path.join(dir, 'semi-utils_file_change_time_for.pylist'), 'w')
     for fp in document_change_time_list:
         file.write(str(fp))
         file.write('\n')
     file.close()
 
 # 读取上次运行时已经处理过的文件信息
-def read_file_change_time(input_dir):
+def read_file_change_time(dir):
     if ignore_file_change_time:
         return []
     
     try:
-        file = open(os.path.join(input_dir, 'semi-utils_file_change_time_for.pylist'), 'r')
+        file = open(os.path.join(dir, 'semi-utils_file_change_time_for.pylist'), 'r')
         document_load = []
         for line in file.readlines():
             line = line.strip('\n')
@@ -291,7 +291,7 @@ if __name__ == '__main__':
     
     
     new_list_file_change_time=[]#新的列表，存放这次运行时输入文件的修改时间
-    old_list_file_change_time=read_file_change_time(input_dir)#旧的列表，存放上一次运行时输入文件的修改时间
+    old_list_file_change_time=read_file_change_time(output_dir)#旧的列表，存放上一次运行时输入文件的修改时间
     process_list=[]
     for file in file_list:
         
@@ -336,5 +336,5 @@ if __name__ == '__main__':
     print()
     print("SKIP  "+str(file_skip_count)+" Files")
     print("WRITE "+str(file_write_count)+" Files")
-    save_file_change_time(input_dir,new_list_file_change_time)
+    save_file_change_time(output_dir,new_list_file_change_time)
     
