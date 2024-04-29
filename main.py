@@ -30,7 +30,9 @@ parser.add_argument('-out','--output_dir', default='')
 parser.add_argument('-q','--quality', default=80)
 parser.add_argument('-r','--resolution', default=0)
 parser.add_argument('-s','--shape', default=0)
+parser.add_argument('-fy','--force_y_padding', default="False")
 parser.add_argument('-y','--file_younger_than', default=0)
+parser.add_argument('-ifct','--ignore_file_change_time', default="False")
 args = parser.parse_args()
 #print(args)
 
@@ -49,6 +51,14 @@ quality = int(args.quality)
 resolution = int(args.resolution)
 padding_ratio = float(args.shape)
 file_younger_than= float(args.file_younger_than)
+if args.force_y_padding.upper() == "TRUE":
+    force_y_padding = True
+else:
+    force_y_padding = False
+if args.ignore_file_change_time.upper() == "TRUE":
+    ignore_file_change_time = True
+else:
+    ignore_file_change_time = False
 
 if not os.path.exists(output_dir):
     os.makedirs(output_dir)
@@ -189,6 +199,9 @@ def save_file_change_time(input_dir,document_change_time_list):
 
 # 读取上次运行时已经处理过的文件信息
 def read_file_change_time(input_dir):
+    if ignore_file_change_time:
+        return []
+    
     try:
         file = open(os.path.join(input_dir, 'semi-utils_file_change_time_for.pylist'), 'r')
         document_load = []
@@ -230,7 +243,7 @@ def semi_utils_wrapper(source,full_fram_resolutions,config,file,layout,target,qu
     
     
     if padding_ratio !=0:
-        cnt_img=padding_up_by_ratio(cnt_img,padding_ratio)
+        cnt_img=padding_up_by_ratio(cnt_img,padding_ratio,force_y_padding)
     
     if resolution != 0:
         cnt_img=resize_scale_down(cnt_img,resolution)
