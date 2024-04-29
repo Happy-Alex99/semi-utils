@@ -169,7 +169,13 @@ equivalent_focal_length:
     - sensor_resolution_Y: 3328
     - crop: 1.0
     - multi_sensor: 1
-    - rename: 'NIKON Z 6'
+    - rename: 'NIKON Z 6'    
+    'Canon EOS R5':
+    - sensor_resolution_X: 8192
+    - sensor_resolution_Y: 5464
+    - crop: 1.0
+    - multi_sensor: 1
+    - rename: 'EOS R5'
     
     'Unknow':
     - sensor_resolution_X: 0
