@@ -36,16 +36,16 @@ def resize_scale_down(image, resolution):
     image=image.resize(target_res,Image.LANCZOS)
     return image
 
-def padding_up_by_ratio(image, padding_ratio):
-    if image.size[0]>image.size[1]:
+def padding_up_by_ratio(image, padding_ratio, force_y_padding=False):
+    if image.size[0]>=image.size[1] and force_y_padding==False:
         target_x=image.size[1]*padding_ratio
-        img = Image.new('RGB', (int(target_x),image.size[1]), color='white')
+        img = Image.new('RGB', (int(target_x),image.size[1]), color='black')
         
         img.paste(image, (int((target_x-image.size[0])/2), 0 )  )
         return img
     else:
         target_y=image.size[0]*padding_ratio
-        img = Image.new('RGB', (image.size[0],int(target_y)), color='white')
+        img = Image.new('RGB', (image.size[0],int(target_y)), color='black')
         
         img.paste(image, (0, int((target_y-image.size[1])/2) ))
         return img
