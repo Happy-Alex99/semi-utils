@@ -15,6 +15,9 @@ logo: # true or false, different Artist logo format: Brand+'_'+Artist. i.e. Cano
     canon_Alex:
       id: Canon_Alex
       path: ./logos/canon_04.13.2421.png
+    canon_ALEX:
+      id: Canon_ALEX
+      path: ./logos/canon_04.13.2421.png
     canon:
       id: Canon
       path: ./logos/canon.png
@@ -156,6 +159,13 @@ equivalent_focal_length:
     - crop: 1.0
     - multi_sensor: 1
     - rename: 'EOS R6'
+    
+    'Canon EOS R6m2':
+    - sensor_resolution_X: 6000
+    - sensor_resolution_Y: 4000
+    - crop: 1.0
+    - multi_sensor: 1
+    - rename: 'EOS R6 Mark II'
     
     'ILCE-7RM3A':
     - sensor_resolution_X: 7952
