@@ -147,6 +147,9 @@ def get_exif(image,full_fram_resolutions,config,file):
         _exif['equivalent_focal_length']='MERGE'
     if 'MULTI' in file.upper():
         _exif['equivalent_focal_length']='MULTI'
+    if '-已增强-SR' in file.upper():
+        _exif['equivalent_focal_length']=int(_exif['equivalent_focal_length']*2)
+    
     #print(_exif)
     return _exif
 
@@ -161,15 +164,22 @@ def ExposureProgram_2_str(ExposureProgram):
 def get_filename_number(filename):
     #return filename.split('.')[0][-4:]
     #filename.split('-')[1].split('_')[1][:4]
-    numbers_4_in_filename=re.findall('\d{4,}',filename)
+    numbers_in_filename=re.findall('\d{1,}',filename)
+    #print(numbers_in_filename)
     try:
-        filename_numbers=numbers_4_in_filename[1]
+        filename_numbers=numbers_in_filename[1]
         if len(filename_numbers)==8:
             try:
-                filename_numbers=numbers_4_in_filename[2]
-                print('using:numbers_4_in_filename[2]')
+                filename_numbers=numbers_in_filename[2]
+                print('using:numbers_in_filename[2]')
             except:
-                print('Warning: numbers_4_in_filename[2]')
+                print('Warning: numbers_in_filename[2]')
+        if len(numbers_in_filename)>2:
+            filename_numbers=str(filename_numbers)+"_"+str(numbers_in_filename[2])
+        if "-已增强-降噪" in filename:
+            filename_numbers=filename_numbers+"_NC"
+        if "-已增强-SR" in filename:
+            filename_numbers=filename_numbers+"_SR"
         return filename_numbers
     except:
         print('cannot obtain file number')
