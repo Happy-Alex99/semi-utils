@@ -219,12 +219,15 @@ def ExposureBias2str_dual (ev_shoot, ev_lightroom):
     return ExposureBias2str(ev_shoot,end_with_Ev=0)+ExposureBias2str(ev_lightroom, force_plus_when0=1,end_with_Ev=1)
     
 def get_IPTC_Tag(iptc):
-    tmp=[i for i in iptc['Iptc.Application2.Keywords'] if '#'==i[0]]
-    if len(tmp)>0:
-        return '  '.join(tmp)
-    else:
-        return ''
-        
+    try:
+        tmp=[i for i in iptc['Iptc.Application2.Keywords'] if '#'==i[0]]
+        if len(tmp)>0:
+            return '  '.join(tmp)
+        else:
+            return ''
+    except:
+        #print("NO IPTC Found")
+        return ""
 def get_str_from_exif(exif, field, filename, xmp, cameras_config, use_short_name=False, iptc=""):
     if 'id' not in field:
         return ''
