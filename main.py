@@ -17,7 +17,7 @@ from PIL import ImageFont
 from PIL.Image import Transpose
 
 
-from utils import parse_datetime, get_file_list, concat_img, get_exif, get_str_from_exif, resize_scale_down, padding_up_by_ratio
+from utils import parse_datetime, get_file_list, concat_img, get_exif, get_str_from_exif, resize_scale_down, padding_up_by_ratio, get_IPTC_Tag
 
 # 布局，全局配置
 FONT_SIZE = 240
@@ -253,6 +253,10 @@ def semi_utils_wrapper(source,cameras_config,config,file,layout,target,quality):
     if resolution != 0:
         cnt_img=resize_scale_down(cnt_img,resolution)
     
+    
+    file_extension=os.path.splitext(os.path.split(target)[1])[1]
+    target=target[:-len(file_extension)]+get_IPTC_Tag(orgiptc)+file_extension
+    
     cnt_img.save(target, quality=quality )
     cnt_img.close()
     img.close()
@@ -302,6 +306,8 @@ if __name__ == '__main__':
     for file in file_list:
         
         skip_this_file=False
+        
+        
         target=os.path.join(output_dir, file)
         source=os.path.join(input_dir, file)
         file_change_time=str(time.ctime(os.stat(source).st_mtime))
