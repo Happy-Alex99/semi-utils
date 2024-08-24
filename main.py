@@ -254,8 +254,8 @@ def semi_utils_wrapper(source,cameras_config,config,file,layout,target,quality):
         cnt_img=resize_scale_down(cnt_img,resolution)
     
     
-    file_extension=os.path.splitext(os.path.split(target)[1])[1]
-    target=target[:-len(file_extension)]+get_IPTC_Tag(orgiptc)+file_extension
+    
+    
     
     cnt_img.save(target, quality=quality )
     cnt_img.close()
@@ -307,9 +307,14 @@ if __name__ == '__main__':
         
         skip_this_file=False
         
-        
-        target=os.path.join(output_dir, file)
         source=os.path.join(input_dir, file)
+        
+        imgin_pyexiv2=pyexiv2.Image(source,encoding='GBK')
+        orgiptc=imgin_pyexiv2.read_iptc()
+        target=os.path.join(output_dir, file)
+        file_extension=os.path.splitext(os.path.split(target)[1])[1]
+        target=target[:-len(file_extension)]+get_IPTC_Tag(orgiptc)+file_extension
+        
         file_change_time=str(time.ctime(os.stat(source).st_mtime))
         new_list_file_change_time.append([file,file_change_time])
         
