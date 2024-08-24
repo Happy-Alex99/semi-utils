@@ -1,4 +1,7 @@
 # -*- encoding:utf-8 -*-
+
+MAX_THREAD=32
+
 import math
 import os
 import time
@@ -75,17 +78,18 @@ makes = config['logo']['makes']
 # 读取等效焦距配置
 # 先将像素密度铺满135画幅，之后通过分辨率计算出等效焦距。优点是能考虑裁切的影响
 
-full_fram_resolutions=[]
-if config['equivalent_focal_length']['enable']:
-    for cameraname in config['equivalent_focal_length']:
+cameras_config=[]
+if config['cameras']['enable']:
+    for cameraname in config['cameras']:
         if cameraname != 'enable':
-            crop=config['equivalent_focal_length'][cameraname][2]['crop']
-            x=config['equivalent_focal_length'][cameraname][0]['sensor_resolution_X']
-            y=config['equivalent_focal_length'][cameraname][1]['sensor_resolution_Y']
-            multi_sensor=config['equivalent_focal_length'][cameraname][3]['multi_sensor']
-            rename=config['equivalent_focal_length'][cameraname][4]['rename']
-            full_fram_resolutions.append((cameraname,x*crop,y*crop,multi_sensor,rename))
-full_fram_resolutions=tuple(full_fram_resolutions)
+            crop=config['cameras'][cameraname][2]['crop']
+            x=config['cameras'][cameraname][0]['sensor_resolution_X']
+            y=config['cameras'][cameraname][1]['sensor_resolution_Y']
+            multi_sensor=config['cameras'][cameraname][3]['multi_sensor']
+            rename=config['cameras'][cameraname][4]['rename']
+            short_name=config['cameras'][cameraname][5]['short_name']
+            cameras_config.append((cameraname,x*crop,y*crop,multi_sensor,rename))
+cameras_config=tuple(cameras_config)
           
 
 # 添加 logo
@@ -125,17 +129,17 @@ def make_two_line_img(first, second):
     return _img
 
 
-def make_normal_watermark(exif, infos, filename, xmp):
+def make_normal_watermark(exif, infos, filename, xmp, iptc):
     original_width, original_height = infos['original_width'], infos['original_height']
     all_ratio, font_ratio = infos['all_ratio'], infos['font_ratio']
     # 位置 1
-    c_11 = get_str_from_exif(exif, elements[0], filename, xmp)
-    c_12 = get_str_from_exif(exif, elements[1], filename, xmp)
+    c_11 = get_str_from_exif(exif, elements[0], filename, xmp, cameras_config, iptc=iptc)
+    c_12 = get_str_from_exif(exif, elements[1], filename, xmp, cameras_config, iptc=iptc)
     img_1 = make_two_line_img(c_11, c_12)
 
     # 位置 2
-    c_21 = get_str_from_exif(exif, elements[2], filename, xmp)
-    c_22 = get_str_from_exif(exif, elements[3], filename, xmp)
+    c_21 = get_str_from_exif(exif, elements[2], filename, xmp, cameras_config, iptc=iptc)
+    c_22 = get_str_from_exif(exif, elements[3], filename, xmp, cameras_config, iptc=iptc)
     img_2 = make_two_line_img(c_21, c_22)
 
     img_watermark = Image.new('RGB', (original_width, math.floor(all_ratio * original_width)), color='white')
@@ -168,7 +172,7 @@ elements = config['layout']['elements']
 
 
 # 生成元信息图片
-def make_exif_img(exif, layout, filename, xmp):
+def make_exif_img(exif, layout, filename, xmp, iptc):
     # 修改水印长宽比
     font_ratio = .07
     all_ratio = .13
@@ -185,7 +189,7 @@ def make_exif_img(exif, layout, filename, xmp):
     settings = {'original_width': original_width, 'original_height': original_height, 'all_ratio': all_ratio,
                 'font_ratio': font_ratio}
     if layout == 'normal':
-        img_watermark = make_normal_watermark(exif, settings, filename, xmp)
+        img_watermark = make_normal_watermark(exif, settings, filename, xmp, iptc)
     # 根据照片长缩放水印
     return img_watermark.resize((wm_x_length, wm_y_length), Image.Resampling.LANCZOS)
 
@@ -213,14 +217,15 @@ def read_file_change_time(dir):
         document_load=[]
     return document_load
 
-def semi_utils_wrapper(source,full_fram_resolutions,config,file,layout,target,quality):
+def semi_utils_wrapper(source,cameras_config,config,file,layout,target,quality):
     #
     # 打开图片
     img = Image.open(source)
     imgin_pyexiv2=pyexiv2.Image(source,encoding='GBK')
     xmp=imgin_pyexiv2.read_xmp()
+    orgiptc=imgin_pyexiv2.read_iptc()
     # 生成 exif 图片
-    exif = get_exif(img,full_fram_resolutions,config,file)
+    exif = get_exif(img,cameras_config,config,file)
     # 修复图片方向
     if 'Orientation' in exif:
         if exif['Orientation'] == 3:
@@ -233,7 +238,7 @@ def semi_utils_wrapper(source,full_fram_resolutions,config,file,layout,target,qu
     
     
     
-    exif_img = make_exif_img(exif, layout, file, xmp)
+    exif_img = make_exif_img(exif, layout, file, xmp, orgiptc)
     #print(file)
     # 拼接两张图片
     cnt_img = concat_img(img, exif_img)
@@ -256,12 +261,13 @@ def semi_utils_wrapper(source,full_fram_resolutions,config,file,layout,target,qu
     #imgin_pyexiv2=pyexiv2.Image(source,encoding='GBK')
     imgtarget_pyexiv2=pyexiv2.Image(target,encoding='GBK')
     
-    orgiptc=imgin_pyexiv2.read_iptc()
+    
     orgxmp=imgin_pyexiv2.read_raw_xmp()
     orgexif=imgin_pyexiv2.read_exif()
     orgcomment=imgin_pyexiv2.read_comment()
     orgicc=imgin_pyexiv2.read_icc()
     orgthumbnail=imgin_pyexiv2.read_thumbnail()
+    
     
 
     
@@ -281,7 +287,7 @@ def semi_utils_wrapper(source,full_fram_resolutions,config,file,layout,target,qu
 if __name__ == '__main__':
     print('#INFO:CONFIG FILE:'+parser_config_file)
     print('Load camera resolutions')
-    print(full_fram_resolutions)  
+    print(cameras_config)  
 
     file_list = get_file_list(input_dir)
     layout = config['layout']['type']
@@ -315,10 +321,10 @@ if __name__ == '__main__':
                 skip_this_file = True
         
         if(skip_this_file == False ):
-            p=Process(target=semi_utils_wrapper,args=(source,full_fram_resolutions,config,file,layout,target,quality))
+            p=Process(target=semi_utils_wrapper,args=(source,cameras_config,config,file,layout,target,quality))
             p.start()
             process_list.append(p)
-            #semi_utils_wrapper(source,full_fram_resolutions,config,file,layout,target,quality)
+            #semi_utils_wrapper(source,cameras_config,config,file,layout,target,quality)
             file_write_count=file_write_count+1
         else:
             pass
@@ -326,7 +332,7 @@ if __name__ == '__main__':
             #file_skip.append("#SKIP# "+target[-30:])
             #print(file_skip[-1])
         
-        if len(process_list)>32:
+        if len(process_list)>MAX_THREAD:
             process_list[0].join()
             del(process_list[0])
             

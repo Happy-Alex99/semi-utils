@@ -51,8 +51,8 @@ layout: # you can select one type in ['normal'], may more type supports later
   type: normal
   elements: # the information displayed in the watermark
     # you can select from ['Date', 'Model', 'LensModel', 'Param', 'Make', 'None', 'DateFilename']
-    - id: LensModel
-    - id: Model_Exposureinfo
+    - id: IPTC_Tag
+    - id: Model_Lens_Exposureinfo
     - id: Param
     - id: DateFilename
 
@@ -60,10 +60,16 @@ layout: # you can select one type in ['normal'], may more type supports later
 #The programme will NOT check the data's order base on the key, so DO FOLLOW the order.
 lens_rename:
     'TAMRON SP 17-50mm F/2.8 DiII A16E':
-    - rename: 'TAMRON 17-50mm F/2.8 A16' 
+    - rename: 'TAMRON 17-50mm F/2.8 A16'
+    - short_name: 'TAMRON 17-50 A016'
     'TAMRON SP 150-600mm F/5-6.3 Di VC USD G2 A022':
     - rename: 'TAMRON 150-600mm F/5-6.3 A022' 
-equivalent_focal_length:
+    - short_name: '156 A022'
+    'RF800mm F11 IS STM':
+    - rename: 'RF800mm F11 IS STM' 
+    - short_name: 'RF811'
+
+cameras:
     enable: true
     
     'NIKON D5500':
@@ -72,7 +78,7 @@ equivalent_focal_length:
     - crop: 1.5
     - multi_sensor: 1
     - rename: 'NIKON D5500' 
-    
+    - short_name: 'D5500'
     
     'Canon EOS 7D Mark II':
     - sensor_resolution_X: 5472
@@ -80,13 +86,15 @@ equivalent_focal_length:
     - crop: 1.6
     - multi_sensor: 1
     - rename: 'EOS 7D Mark II' 
- 
+    - short_name: '7D2'
+    
     'Canon EOS 80D':
     - sensor_resolution_X: 6000
     - sensor_resolution_Y: 4000
     - crop: 1.6
     - multi_sensor: 1
     - rename: 'EOS 80D'
+    - short_name: '80D'
 
     'Canon EOS 800D':
     - sensor_resolution_X: 6000
@@ -94,6 +102,7 @@ equivalent_focal_length:
     - crop: 1.6
     - multi_sensor: 1
     - rename: 'EOS 800D'
+    - short_name: '800D'
 
     
     'Canon EOS 550D':
@@ -102,24 +111,31 @@ equivalent_focal_length:
     - crop: 1.6
     - multi_sensor: 1
     - rename: 'EOS 550D'
+    - short_name: '550D'
+    
     'NIKON D750':
     - sensor_resolution_X: 6016
     - sensor_resolution_Y: 4016
     - crop: 1.0
     - multi_sensor: 1
     - rename: 'NIKON D750'
+    - short_name: 'D750'
+    
     'MI 5s':
     - sensor_resolution_X: 4072
     - sensor_resolution_Y: 3176
     - crop: 5.5
     - multi_sensor: 1
     - rename: 'MI 5s'
+    - short_name: 'MI 5s'
+    
     'ZV-E10':
     - sensor_resolution_X: 6000
     - sensor_resolution_Y: 4000
     - crop: 1.5
     - multi_sensor: 1
     - rename: 'ZV-E10'
+    - short_name: 'ZV-E10'
     
     'M2104K10AC':
     - sensor_resolution_X: 0
@@ -129,6 +145,7 @@ equivalent_focal_length:
     #sensor information in this order: FocalLength(with mm after it(important)),full_fram_resolutionX,full_fram_resolutionY. 
     - multi_sensor: 2
     - rename: 'RMNote10Pro'
+    - short_name: 'RMNote10Pro'
     #wide: 1.66mm crop11 3280x2464,Digizoom correct 0.6 Don't lose mm in specialFocalLength
     - specialFocalLength--1: 1.66mm
     - sensor_resolution_X--1: 0
@@ -152,6 +169,7 @@ equivalent_focal_length:
     - crop: 1.6
     - multi_sensor: 1
     - rename: 'EOS 600D'
+    - short_name: '600D'
     
     'Canon EOS R6':
     - sensor_resolution_X: 5472
@@ -159,6 +177,8 @@ equivalent_focal_length:
     - crop: 1.0
     - multi_sensor: 1
     - rename: 'EOS R6'
+    - short_name: 'EOS R6'
+    
     
     'Canon EOS R6m2':
     - sensor_resolution_X: 6000
@@ -166,6 +186,7 @@ equivalent_focal_length:
     - crop: 1.0
     - multi_sensor: 1
     - rename: 'EOS R6 Mark II'
+    - short_name: 'EOS R62'
     
     'ILCE-7RM3A':
     - sensor_resolution_X: 7952
@@ -173,6 +194,7 @@ equivalent_focal_length:
     - crop: 1.0
     - multi_sensor: 1
     - rename: 'A7R3a'
+    - short_name: 'A7R3a'
     
     'NIKON Z 6':
     - sensor_resolution_X: 5000
@@ -180,12 +202,15 @@ equivalent_focal_length:
     - crop: 1.0
     - multi_sensor: 1
     - rename: 'NIKON Z 6'    
+    - short_name: 'NIKON Z 6'    
+    
     'Canon EOS R5':
     - sensor_resolution_X: 8192
     - sensor_resolution_Y: 5464
     - crop: 1.0
     - multi_sensor: 1
     - rename: 'EOS R5'
+    - short_name: 'EOS R5'
     
     'Unknow':
     - sensor_resolution_X: 0
@@ -193,3 +218,4 @@ equivalent_focal_length:
     - crop: 1
     - multi_sensor: 1
     - rename: 'Camera_Not_Config'
+    - short_name: 'TBD'

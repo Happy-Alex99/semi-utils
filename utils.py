@@ -73,7 +73,7 @@ def concat_img(img_x, img_y):
 
 
 # 读取 exif 信息，包括相机机型、相机品牌、图片尺寸、镜头焦距、光圈大小、曝光时间、ISO 和拍摄时间
-def get_exif(image,full_fram_resolutions,config,file):
+def get_exif(image,cameras_config,config,file):
     
     _exif = {}
     info = image._getexif()
@@ -87,7 +87,7 @@ def get_exif(image,full_fram_resolutions,config,file):
             #计算等效焦距
         
             digital_zoom=1.0
-            for full_fram_resolution in full_fram_resolutions:
+            for full_fram_resolution in cameras_config:
                 if full_fram_resolution[0]==_exif['Model']:
                     if full_fram_resolution[3]==1:#only 1 sensor
                         full_fram_resolutionX=full_fram_resolution[1]
@@ -118,6 +118,10 @@ def get_exif(image,full_fram_resolutions,config,file):
                     break
             
             _exif['Model']=full_fram_resolution[4]# Rename camera name
+            try:
+                _exif['LensModel_short_name']=config['lens_rename'][_exif['LensModel']][1]['short_name']#rename lens
+            except:
+                pass
             try:
                 _exif['LensModel']=config['lens_rename'][_exif['LensModel']][0]['rename']#rename lens
             except:
@@ -177,7 +181,7 @@ def get_filename_number(filename):
         if len(numbers_in_filename)>2:
             filename_numbers=str(filename_numbers)+"_"+str(numbers_in_filename[2])
         if "-已增强-降噪" in filename:
-            filename_numbers=filename_numbers+"_NC"
+            filename_numbers=filename_numbers+"_NR"
         if "-已增强-SR" in filename:
             filename_numbers=filename_numbers+"_SR"
         return filename_numbers
@@ -214,14 +218,19 @@ def ExposureBias2str_dual (ev_shoot, ev_lightroom):
     #print(ev_lightroom)
     return ExposureBias2str(ev_shoot,end_with_Ev=0)+ExposureBias2str(ev_lightroom, force_plus_when0=1,end_with_Ev=1)
     
-    
+def get_IPTC_Tag(iptc):
+    tmp=[i for i in iptc['Iptc.Application2.Keywords'] if '#'==i[0]]
+    if len(tmp)>0:
+        return '  '.join(tmp)
+    else:
+        return ''
         
-def get_str_from_exif(exif, field, filename, xmp):
+def get_str_from_exif(exif, field, filename, xmp, cameras_config, use_short_name=False, iptc=""):
     if 'id' not in field:
         return ''
     field_id = field.get('id')
     if 'Param' == field_id:
-        return get_param_str_from_exif(exif)
+        return get_param_str_from_exif(exif, use_short_name)
     elif 'Date' == field_id:
         try:
             return datetime.strftime(parse_datetime(exif['DateTimeOriginal']), '%Y-%m-%d %H:%M')
@@ -233,6 +242,8 @@ def get_str_from_exif(exif, field, filename, xmp):
             return datetime.strftime(parse_datetime(exif['DateTimeOriginal']), '%Y-%m-%d %H:%M')+'  ['+get_filename_number(filename)+']'
         except:
             return ""
+    elif 'IPTC_Tag' == field_id:
+        return get_IPTC_Tag(iptc)
     elif 'Model_Exposureinfo' == field_id:
         try:
             try:
@@ -250,12 +261,20 @@ def get_str_from_exif(exif, field, filename, xmp):
                 ExposureBiasValue_str=exif_ExposureBiasValue+xmp_ExposureBiasValue
             #print(ExposureBiasValue_str)
             
+            Model=exif['Model']
+            if use_short_name:
+                Model=[i for i in cameras_config if i[4]==Model][0][4]
+            
             return '  '.join( (exif['Model'],ExposureProgram_2_str(exif['ExposureProgram']), ExposureBiasValue_str) )
         except:
             print(__file__)
             print(sys._getframe().f_lineno)
             return ""
-        
+    
+    elif 'LensModel' == field_id and use_short_name:    
+        return exif['LensModel_short_name']
+    elif 'Model_Lens_Exposureinfo' == field_id:
+        return get_str_from_exif(exif, {'id': 'Model_Exposureinfo'}, filename, xmp, cameras_config, use_short_name=True)+', '+get_str_from_exif(exif, {'id': 'LensModel'}, filename, xmp, cameras_config, use_short_name=True)
     else:
         if field_id in exif:
             return exif[field_id]
@@ -263,7 +282,7 @@ def get_str_from_exif(exif, field, filename, xmp):
             return ''
 
 
-def get_param_str_from_exif(exif):
+def get_param_str_from_exif(exif, use_short_name=False):
     #print(exif)
     try:
         if exif['equivalent_focal_length']=='PANO' or exif['equivalent_focal_length']=='MERGE'or exif['equivalent_focal_length']=='MULTI':
