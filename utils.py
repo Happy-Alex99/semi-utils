@@ -121,7 +121,7 @@ def get_exif(image,cameras_config,config,file):
             try:
                 _exif['LensModel_short_name']=config['lens_rename'][_exif['LensModel']][1]['short_name']#rename lens
             except:
-                _exif['LensModel_short_name']=""
+                _exif['LensModel_short_name']=_exif['LensModel']
             try:
                 _exif['LensModel']=config['lens_rename'][_exif['LensModel']][0]['rename']#rename lens
             except:
