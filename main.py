@@ -305,33 +305,34 @@ if __name__ == '__main__':
     process_list=[]
     for file in file_list:
         
-        skip_this_file=False
-        
         source=os.path.join(input_dir, file)
-        
-        imgin_pyexiv2=pyexiv2.Image(source,encoding='GBK')
-        orgiptc=imgin_pyexiv2.read_iptc()
-        target=os.path.join(output_dir, file)
-        file_extension=os.path.splitext(os.path.split(target)[1])[1]
-        target=target[:-len(file_extension)]+get_IPTC_Tag(orgiptc)+file_extension
-        
+        skip_this_file=False
         file_change_time=str(time.ctime(os.stat(source).st_mtime))
         new_list_file_change_time.append([file,file_change_time])
+        if str([file,file_change_time]) in old_list_file_change_time:
+            skip_this_file = True
+        else:
+            skip_this_file = False
         
         
-        if(os.path.exists(target)):
-            #skip_this_file=True
-            #跳过未修改的文件
-            if str([file,file_change_time]) in old_list_file_change_time:
-                skip_this_file = True
-            else:
-                skip_this_file = False
+        
+        
+        
+        
+        
+        #if(os.path.exists(target)):
+            
         if file_younger_than!=0:
             file_age=(time.time()-os.path.getmtime(source))/(24*3600)
             if file_age>file_younger_than:
                 skip_this_file = True
         
         if(skip_this_file == False ):
+            imgin_pyexiv2=pyexiv2.Image(source,encoding='GBK')
+            orgiptc=imgin_pyexiv2.read_iptc()
+            target=os.path.join(output_dir, file)
+            file_extension=os.path.splitext(os.path.split(target)[1])[1]
+            target=target[:-len(file_extension)]+get_IPTC_Tag(orgiptc)+file_extension
             p=Process(target=semi_utils_wrapper,args=(source,cameras_config,config,file,layout,target,quality))
             p.start()
             process_list.append(p)
