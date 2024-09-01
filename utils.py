@@ -217,12 +217,14 @@ def ExposureBias2str (ev, force_plus_when0=0, end_with_Ev=1):#
 def ExposureBias2str_dual (ev_shoot, ev_lightroom):
     #print(ev_lightroom)
     return ExposureBias2str(ev_shoot,end_with_Ev=0)+ExposureBias2str(ev_lightroom, force_plus_when0=1,end_with_Ev=1)
-    
+def count_tag(elem):
+    return elem.count("#")
 def get_IPTC_Tag(iptc):
     try:
         tmp=[i for i in iptc['Iptc.Application2.Keywords'] if '#'==i[0]]
+        tmp.sort(key=count_tag)
         if len(tmp)>0:
-            return '  '.join(tmp)
+            return '    '.join(tmp)
         else:
             return ''
     except:
