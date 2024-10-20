@@ -36,6 +36,7 @@ parser.add_argument('-s','--shape', default=0)
 parser.add_argument('-fy','--force_y_padding', default="False")
 parser.add_argument('-y','--file_younger_than', default=0)
 parser.add_argument('-ifct','--ignore_file_change_time', default="False")
+parser.add_argument('-incognito','--incognito_remove_all_exif_iptc', default="False")
 args = parser.parse_args()
 #print(args)
 
@@ -62,6 +63,10 @@ if args.ignore_file_change_time.upper() == "TRUE":
     ignore_file_change_time = True
 else:
     ignore_file_change_time = False
+if args.incognito_remove_all_exif_iptc.upper() == "TRUE":
+    incognito_remove_all_exif_iptc = True
+else:
+    incognito_remove_all_exif_iptc = False
 
 if not os.path.exists(output_dir):
     os.makedirs(output_dir)
@@ -221,29 +226,33 @@ def semi_utils_wrapper(source,cameras_config,config,file,layout,target,quality):
     #
     # 打开图片
     img = Image.open(source)
-    imgin_pyexiv2=pyexiv2.Image(source,encoding='GBK')
-    xmp=imgin_pyexiv2.read_xmp()
-    orgiptc=imgin_pyexiv2.read_iptc()
-    # 生成 exif 图片
-    exif = get_exif(img,cameras_config,config,file)
-    # 修复图片方向
-    if 'Orientation' in exif:
-        if exif['Orientation'] == 3:
-            img = img.transpose(Transpose.ROTATE_180)
-        elif exif['Orientation'] == 6:
-            img = img.transpose(Transpose.ROTATE_270)
-        elif exif['Orientation'] == 8:
-            img = img.transpose(Transpose.ROTATE_90)
-    exif['ExifImageWidth'], exif['ExifImageHeight'] = img.width, img.height
+    if incognito_remove_all_exif_iptc==False:
+        imgin_pyexiv2=pyexiv2.Image(source,encoding='GBK')
+        xmp=imgin_pyexiv2.read_xmp()
+        orgiptc=imgin_pyexiv2.read_iptc()
+        # 生成 exif 图片
+        exif = get_exif(img,cameras_config,config,file)
+        # 修复图片方向
+        if 'Orientation' in exif:
+            if exif['Orientation'] == 3:
+                img = img.transpose(Transpose.ROTATE_180)
+            elif exif['Orientation'] == 6:
+                img = img.transpose(Transpose.ROTATE_270)
+            elif exif['Orientation'] == 8:
+                img = img.transpose(Transpose.ROTATE_90)
+        exif['ExifImageWidth'], exif['ExifImageHeight'] = img.width, img.height
+        
+        
+        
+        exif_img = make_exif_img(exif, layout, file, xmp, orgiptc)
+        #print(file)
+        # 拼接两张图片
     
-    
-    
-    exif_img = make_exif_img(exif, layout, file, xmp, orgiptc)
-    #print(file)
-    # 拼接两张图片
-    cnt_img = concat_img(img, exif_img)
-
-
+        cnt_img = concat_img(img, exif_img)
+    else:
+        cnt_img = Image.new('RGB', (img.width, img.height), color='white')
+        cnt_img.paste(img, (0, 0))
+        
     
     
     
@@ -260,34 +269,36 @@ def semi_utils_wrapper(source,cameras_config,config,file,layout,target,quality):
     cnt_img.save(target, quality=quality )
     cnt_img.close()
     img.close()
-    
-    #拷贝EXIF和IPTC等元数据
-    #imgin_pyexiv2=pyexiv2.Image(source,encoding='GBK')
-    imgtarget_pyexiv2=pyexiv2.Image(target,encoding='GBK')
-    
-    
-    orgxmp=imgin_pyexiv2.read_raw_xmp()
-    orgexif=imgin_pyexiv2.read_exif()
-    orgcomment=imgin_pyexiv2.read_comment()
-    orgicc=imgin_pyexiv2.read_icc()
-    orgthumbnail=imgin_pyexiv2.read_thumbnail()
-    
-    
+    if incognito_remove_all_exif_iptc==False:
+        #拷贝EXIF和IPTC等元数据
+        #imgin_pyexiv2=pyexiv2.Image(source,encoding='GBK')
+        imgtarget_pyexiv2=pyexiv2.Image(target,encoding='GBK')
+        
+        
+        orgxmp=imgin_pyexiv2.read_raw_xmp()
+        orgexif=imgin_pyexiv2.read_exif()
+        orgcomment=imgin_pyexiv2.read_comment()
+        orgicc=imgin_pyexiv2.read_icc()
+        orgthumbnail=imgin_pyexiv2.read_thumbnail()
+        
+        
 
+        
+        imgtarget_pyexiv2.modify_iptc(orgiptc)
+        imgtarget_pyexiv2.modify_raw_xmp(orgxmp)
+        imgtarget_pyexiv2.modify_exif(orgexif)
+        #imgtarget_pyexiv2.modify_comment(orgcomment)
+        #imgtarget_pyexiv2.modify_icc(orgicc)  
+        #imgtarget_pyexiv2.modify_thumbnail(orgthumbnail)
+        
+        imgin_pyexiv2.close()
+        imgtarget_pyexiv2.close()
+        #print(img.info)
+        #print(" WRITE "+target[-30:])
     
-    imgtarget_pyexiv2.modify_iptc(orgiptc)
-    imgtarget_pyexiv2.modify_raw_xmp(orgxmp)
-    imgtarget_pyexiv2.modify_exif(orgexif)
-    #imgtarget_pyexiv2.modify_comment(orgcomment)
-    #imgtarget_pyexiv2.modify_icc(orgicc)  
-    #imgtarget_pyexiv2.modify_thumbnail(orgthumbnail)
-    
-    imgin_pyexiv2.close()
-    imgtarget_pyexiv2.close()
-    #print(img.info)
-    #print(" WRITE "+target[-30:])
-    
-    print(" WRITE "+target[-30:])
+        print(" WRITE "+target[-30:])
+    else:
+        print(" INCO_WRITE "+target[-30:])
 if __name__ == '__main__':
     print('#INFO:CONFIG FILE:'+parser_config_file)
     print('Load camera resolutions')
