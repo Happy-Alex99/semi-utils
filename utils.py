@@ -277,7 +277,10 @@ def get_str_from_exif(exif, field, filename, xmp, cameras_config, use_short_name
             return ""
     
     elif 'LensModel' == field_id and use_short_name:    
-        return exif['LensModel_short_name']
+        try:
+            return exif['LensModel_short_name']
+        except:
+            return ""
     elif 'Model_Lens_Exposureinfo' == field_id:
         return get_str_from_exif(exif, {'id': 'Model_Exposureinfo'}, filename, xmp, cameras_config, use_short_name=True)+', '+get_str_from_exif(exif, {'id': 'LensModel'}, filename, xmp, cameras_config, use_short_name=True)
     else:

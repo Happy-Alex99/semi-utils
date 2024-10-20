@@ -61,14 +61,16 @@ layout: # you can select one type in ['normal'], may more type supports later
 lens_rename:
     'TAMRON SP 17-50mm F/2.8 DiII A16E':
     - rename: 'TAMRON 17-50mm F/2.8 A16'
-    - short_name: 'TAMRON 17-50 A016'
+    - short_name: '17-50 A016'
     'TAMRON SP 150-600mm F/5-6.3 Di VC USD G2 A022':
     - rename: 'TAMRON 150-600mm F/5-6.3 A022' 
     - short_name: '156 A022'
     'RF800mm F11 IS STM':
     - rename: 'RF800mm F11 IS STM' 
     - short_name: 'RF811'
-
+    'EF100-300mm f/4.5-5.6 USM':
+    - rename: 'EF100-300mm f/4.5-5.6 USM' 
+    - short_name: '100-300f/4.5-5.6'
 cameras:
     enable: true
     
@@ -85,7 +87,7 @@ cameras:
     - sensor_resolution_Y: 3648
     - crop: 1.6
     - multi_sensor: 1
-    - rename: 'EOS 7D Mark II' 
+    - rename: 'EOS 7D II' 
     - short_name: '7D2'
     
     'Canon EOS 80D':
@@ -185,7 +187,7 @@ cameras:
     - sensor_resolution_Y: 4000
     - crop: 1.0
     - multi_sensor: 1
-    - rename: 'EOS R6 Mark II'
+    - rename: 'EOS R6 II'
     - short_name: 'EOS R62'
     
     'ILCE-7RM3A':
