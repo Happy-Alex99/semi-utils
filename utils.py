@@ -247,6 +247,20 @@ def get_str_from_exif(exif, field, filename, xmp, cameras_config, use_short_name
             return datetime.strftime(parse_datetime(exif['DateTimeOriginal']), '%Y-%m-%d %H:%M')+'  ['+get_filename_number(filename)+']'
         except:
             return ""
+    elif 'DateFilename_Distance' == field_id:
+        distance=""
+        try:
+            tmp=xmp['Xmp.aux.ApproximateFocusDistance']
+            tmp=tmp.split("/")
+            distance=int(tmp[0])/int(tmp[1])
+            distance=" @"+str(round(distance, 2))+"m"
+        except:
+            distance=""
+        try:
+            
+            return datetime.strftime(parse_datetime(exif['DateTimeOriginal']), '%Y-%m-%d %H:%M')+'  ['+get_filename_number(filename)+']'+distance
+        except:
+            return ""
     elif 'IPTC_Tag' == field_id:
         return get_IPTC_Tag(iptc)
     elif 'Model_Exposureinfo' == field_id:

@@ -54,7 +54,7 @@ layout: # you can select one type in ['normal'], may more type supports later
     - id: IPTC_Tag
     - id: Model_Lens_Exposureinfo
     - id: Param
-    - id: DateFilename
+    - id: DateFilename_Distance
 
 #DO NOT CHANGE ELEMENTS ORDER
 #The programme will NOT check the data's order base on the key, so DO FOLLOW the order.
@@ -68,6 +68,15 @@ lens_rename:
     'RF800mm F11 IS STM':
     - rename: 'RF800mm F11 IS STM' 
     - short_name: 'RF811'
+    'RF800mm F11 IS STM + EXTENDER RF1.4x':
+    - rename: 'RF800mm F11 IS STM + EXTENDER RF1.4x' 
+    - short_name: 'RF811+1.4x'
+    'RF70-200mm F2.8 L IS USM Z':
+    - rename: 'RF70-200mm F2.8 L IS USM Z + EXTENDER RF1.4x' 
+    - short_name: 'RF720z'
+    'RF70-200mm F2.8 L IS USM Z + EXTENDER RF1.4x':
+    - rename: 'RF70-200mm F2.8 L IS USM Z + EXTENDER RF1.4x' 
+    - short_name: 'RF720z+1.4x'
     'EF100-300mm f/4.5-5.6 USM':
     - rename: 'EF100-300mm f/4.5-5.6 USM' 
     - short_name: '100-300f/4.5-5.6'
